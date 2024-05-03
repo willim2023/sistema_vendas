@@ -11,40 +11,65 @@ class UsuarioDAO implements BaseDAO {
     }
 
     public function getById($id) {
-      try {
-      // Preparar a consulta SQL
-      $sql = "SELECT * FROM Usuario WHERE Id =id";
+        try {
+            // Preparar a consulta SQL
+            $sql = "SELECT * FROM Usuario WHERE Id = :id";
 
-      // Preparar a instrução
-      $stmt = $this->db->prepare($sql);
+            // Preparar a instrução
+            $stmt = $this->db->prepare($sql);
 
-      // Vincular parâmetros
-      $stmt->bindParam(':id', $id);
+            // Vincular parâmetros
+            $stmt->bindParam(':id', $id);
 
-      // Executa a instrução
-      $stmt->execute();
+            // Executa a instrução
+            $stmt->execute();
 
-      // Obtem o usuario encontrado
-      $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Obtem o usuario encontrado;
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-      // REtorna o usuario encontrsado
-      return $usuario ? new Usuario($usuario['Id'],
-                                    $usuario['NomeUsuario'], 
-                                    $usuario['Senha'], 
-                                    $usuario['Email'], 
-                                    $usuario['GrupoUsuarioID'],
-                                    $usuario['Ativo'],
-                                    $usuario['DataCriacao'],
-                                    $usuario['DataAtualizacao'])
-          : null;
-    } catch (PDOException $e) {
-        return null;
+            // Retorna o usuário encontrado
+            return $usuario ? 
+                new Usuario($usuario['Id'],
+                            $usuario['NomeUsuario'], 
+                            $usuario['Senha'], 
+                            $usuario['Email'], 
+                            $usuario['GrupoUsuarioID'],
+                            $usuario['Ativo'],
+                            $usuario['DataCriacao'],
+                            $usuario['DataAtualizacao']) 
+                : null;
+        } catch (PDOException $e) {
+            return null;
+        }
     }
 
-}
-
     public function getAll() {
+        try {
+            // Preparar a consulta SQL
+            $sql = "SELECT * FROM Usuario";
 
+            // Preparar a instrução
+            $stmt = $this->db->prepare($sql);
+
+            // Executa a instrução
+            $stmt->execute();
+
+            // Obtem o usuario encontrado;
+            $usuarios = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return array_map(function ($usuario) {
+                return new Usuario($usuario['Id'],
+                    $usuario['NomeUsuario'], 
+                    $usuario['Senha'], 
+                    $usuario['Email'], 
+                    $usuario['GrupoUsuarioID'],
+                    $usuario['Ativo'],
+                    $usuario['DataCriacao'],
+                    $usuario['DataAtualizacao']);
+            }, $usuarios);            
+        } catch (PDOException $e) {
+            return null;
+        }
     }
 
     public function create($entity) {
