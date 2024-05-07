@@ -29,7 +29,5 @@ class PedidoDAO implements BaseDAO {
     public function delete($id) {
 
     }
-
-
 }
 ?>
