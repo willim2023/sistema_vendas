@@ -78,7 +78,7 @@ class UsuarioDAO implements BaseDAO {
     public function create($usuario) {
         try {
             // Preparar a consulta SQL
-            $sql = "INSERT INTO Usuario( NomeUsuario , Senha , Email , GrupoUsuarioID , Ativo , DataCriacao , DataAtualizacao , UsuarioAtualizacao )
+            $sql = "INSERT INTO Usuario( NomeUsuario , Senha , Email , GrupoUsuarioID , Ativo , DataCriacao , DataAtualizacao , UsuarioAtualizacao, Token)
                     VALUES(:nomeUsuario, :senha, :email, :grupoUsuarioID, :ativo, current_timestamp(),current_timestamp(),null, :token)";
 
             // Preparar a instrução
@@ -90,7 +90,7 @@ class UsuarioDAO implements BaseDAO {
             $email = $usuario->getEmail();
             $grupoUsuarioID = $usuario->getGrupoUsuarioId();
             $ativo = $usuario->getAtivo();
-            $token =  $usuario->generateToken();
+            $token = $usuario->generateToken();
 
             $stmt->bindParam(':nomeUsuario', $nomeUsuario);
             $stmt->bindParam(':senha', $senha);
@@ -160,6 +160,37 @@ class UsuarioDAO implements BaseDAO {
             return false;
         }
     }
-}
 
-?>
+    public function getByEmail($email) {
+        try {
+            // Preparar a consulta SQL
+            $sql = "SELECT * FROM Usuario WHERE Email = :email";
+
+            // Preparar a instrução
+            $stmt = $this->db->prepare($sql);
+
+            // Vincular parâmetros
+            $stmt->bindParam(':email', $email);
+
+            // Executa a instrução
+            $stmt->execute();
+
+            // Obtem o usuario encontrado;
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Retorna o usuário encontrado
+            return $usuario ? 
+                new Usuario($usuario['Id'],
+                            $usuario['NomeUsuario'], 
+                            $usuario['Senha'], 
+                            $usuario['Email'], 
+                            $usuario['GrupoUsuarioID'],
+                            $usuario['Ativo'],
+                            $usuario['DataCriacao'],
+                            $usuario['DataAtualizacao']) 
+                : null;
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
+}
