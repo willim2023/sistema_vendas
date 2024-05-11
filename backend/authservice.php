@@ -5,22 +5,22 @@ require_once 'dao/UsuarioDAO.php';
 
 $type = filter_input(INPUT_POST, "type");
 
-if ($type === "register") {
+if($type === "register") {
     // Lógica de registro do usuário
     $new_nome = filter_input(INPUT_POST, "new_nome");
     $new_email = filter_input(INPUT_POST, "new_email", FILTER_SANITIZE_EMAIL);
     $new_password = filter_input(INPUT_POST, "new_password");
-    $confirm_password = filter_input(INPUT_POST, "confirm_password");
-
-    if ($new_email && $new_nome && $new_password) {
-        if ($new_password === $confirm_password) {
+    $confirm_password = filter_input(INPUT_POST, "confirm_password");   
+    
+    if($new_email && $new_nome && $new_password) {
+        if($new_password === $confirm_password) {
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
-            $usuario = new Usuario(null, $new_nome, $hashed_password, $new_email, null, null, null, null);
+            $usuario = new Usuario(null, $new_nome, $hashed_password, $new_email, null, null, null, null);    
             $usuarioDAO = new UsuarioDAO();
             $success = $usuarioDAO->create($usuario);
-
-            if ($success) {
+            
+            if($success) {
                 header("Location: index.php");
                 exit();
             } else {
@@ -35,16 +35,17 @@ if ($type === "register") {
 } elseif ($type === "login") {
     // TODO: verificar se o usuário tem cadastro
     $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_EMAIL);
+    $password = filter_input(INPUT_POST, "password");
     $usuarioDAO = new UsuarioDAO();
     $usuario = $usuarioDAO->getByEmail($email);
 
-    if($usuario) {
-        $_SESSION = $usuario->generateToken();
+    if($usuario && password_verify($password, $usuario->getSenha())) {        
         header("Location: index.php");
         exit();
     } else {
         header("Location: error_page.php");
         exit();
     }
-    // dar ao usuário um token de sessão para navegar no site
 }
+
+?>
